@@ -2,9 +2,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-import requests
-from bs4 import BeautifulSoup
-
 def get_readings(kanji):
     url = f"https://jisho.org/search/{kanji}%20%23kanji"
     headers = {"User-Agent": "Mozilla/5.0"}
