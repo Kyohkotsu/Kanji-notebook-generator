@@ -100,10 +100,11 @@ class KanjiScrapingApp(tk.Frame):
             onwords = [a.get_text() for a in onwords_section.find_all("li")]
             if len(onwords) >= 3:
                 onwords = onwords[:3]
+
         frequency = []
-        frequency_section = soup.select_one(".kanji-details__main-readings dl.on_yomi")
+        frequency_section = soup.select_one(".frequency")
         if frequency_section:
-            frequency = [a.get_text() for a in on_section.find_all("a")]
+            frequency = [frequency_section.get_text()]
 
         return kunyomi, onyomi, jlptlevel, frequency, kunwords, onwords
 
