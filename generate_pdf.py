@@ -12,26 +12,32 @@ class Kanjiinpdf(str):
         self.c = canvas.Canvas('kanji.pdf', pagesize=A4)
         self.width, self.height = A4
 
-    def create_kanji_pdf(self, kanji, kunyomi, onyomi, jlptlevel, frequency, kunwords, onwords, image_url):
+    def create_kanji_pdf(self, kanji, kunyomi, onyomi, jlptlevel, frequency, kunwords, onwords):
         self.c.setFont('Tsukuhou', 100)
         self.c.drawString(100, 720, f'{kanji}')
         self.c.setFont('Tsukuhou', 16)
-        self.c.drawString(100, 680, f'訓読み: {' / '.join(kunyomi)}')
-        self.c.drawString(100, 660, f'音読み: {' / '.join(onyomi)}')
-        self.c.drawString(100, 640, f'JLPTレベル: {', '.join(jlptlevel)}')
-        self.c.drawString(100, 620, f'頻度: {', '.join(frequency)}')
-        self.c.drawString(100, 600, f'訓読みをふくむ言葉: {'; '.join(kunwords)}')
-        self.c.drawString(100, 580, f'音読みをふくむ言葉: {'; '.join(onwords)}')
+        self.c.drawString(220, 740, f'訓読み(Kunyomi): {' / '.join(kunyomi)}')
+        self.c.drawString(220, 720, f'音読み(Onyomi): {' / '.join(onyomi)}')
+        self.c.drawString(100, 680, f'JLPTレベル: {', '.join(jlptlevel)}')
+        self.c.drawString(100, 660, f'頻度(Fréquence): {', '.join(frequency)}')
+        self.c.drawString(100, 620, "言葉(Vocabulaire):")
+        place = 600
+        for word in kunwords:
+            self.c.drawString(105, place, f' {word}')
+            place -= 20
+        for word in onwords:
+            self.c.drawString(105, place, f' {word}')
+            place -= 20
 
-        self.c.drawImage(image_url, 50, self.height-700, width=510, height=340)
-
+        try:
+            image_url = f'https://kakijun.com/kanjiphoto/worksheet/2/kanji-kakijun-worksheet-2-{hex(ord(kanji))[2:6]}.png'
+            self.c.drawImage(image_url, 50, self.height-700, width=510, height=340)
+        except IOError:
+            pass
         self.c.showPage()
 
     def savedocument(self):
-        try:
-            self.c.save()
-        except PermissionError:
-            print("\033[31mNous n'avons pas pu savegarder le fichier pdf car il est déjà ouvert. Veuillez fermer le fichier actuel et refaire.\033[0m")
+        self.c.save()
 
 
 # if __name__ == '__main__':
