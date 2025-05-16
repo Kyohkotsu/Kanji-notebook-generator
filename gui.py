@@ -1,10 +1,9 @@
-import requests
-from bs4 import BeautifulSoup
 import tkinter as tk
 from tkinter import scrolledtext
 from generate_pdf import Kanjiinpdf
 import os
 from get_data import get_data
+import re
 
 
 class KanjiScrapingApp(tk.Frame):
@@ -37,6 +36,7 @@ class KanjiScrapingApp(tk.Frame):
     def get_request(self):
         """Convertit le texte saisi en une liste de kanjis. Pour chaque kanji, il émet une requête de recherche."""
         kanji_list = self.kanjiInput_entry.get().strip()
+        kanji_list = re.findall(r'[\u4e00-\u9faf]', kanji_list)
         if not kanji_list:
             self.response_text.insert(tk.END, "Veuillez saisir une liste de kanjis.\n")
             return
@@ -46,13 +46,13 @@ class KanjiScrapingApp(tk.Frame):
             pdf = Kanjiinpdf()
             i = 1
             for c in kanji_list:
-                kunyomi, onyomi, jlptlevel, frequency, kunwords, onwords, errormessages = get_data(c)
+                kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages = get_data(c)
                 self.response_text.insert(tk.END, f"{i}. {c}\n")
                 self.response_text.insert(tk.END, f"訓読み (Kunyomi): {str(kunyomi)}\n")
                 self.response_text.insert(tk.END, f"音読み (Onyomi) : {str(onyomi)} \n")
                 for message in errormessages:
                     self.response_text.insert(tk.END, f"Attention : {message}\n")
-                pdf.create_kanji_pdf(c, kunyomi, onyomi, jlptlevel, frequency, kunwords, onwords)
+                pdf.create_kanji_pdf(c, kunyomi, onyomi, jlptlevel, frequency, samplewords)
                 self.response_text.insert(tk.END, f"{c} a été ajouté dans le pdf.\n\n")
                 i += 1
             
