@@ -18,7 +18,7 @@ class Kanjiinpdf(str):
         self.c.setFont('Tsukuhou', 16)
         self.c.drawString(170, 740, f'訓読み(くんよみ): {'/'.join(kunyomi)}')
         self.c.drawString(170, 720, f'音読み(おんよみ): {'/'.join(onyomi)}')
-        self.c.drawString(50, 680, f'JLPTレベル: {', '.join(jlptlevel)}')
+        self.c.drawString(50, 680, f'JLPTレベル: {''.join(jlptlevel)}')
         self.c.drawString(50, 660, f'頻度(ひんど): {''.join(frequency)}')
         self.c.drawString(50, 600, "言葉(ことば):")
         place = 580
@@ -39,7 +39,7 @@ class Kanjiinpdf(str):
     def savedocument(self):
         self.c.save()
 
-
+# test
 if __name__ == '__main__':
     import os
     print("Test. Création de kanji.pdf en cours...")
