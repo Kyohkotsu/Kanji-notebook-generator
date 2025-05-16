@@ -39,7 +39,7 @@ def get_data(kanji):
         kunyomi = kunyomi[:4]
 
     jlptlevel = ["Ne fait pas partie du JLPT"]
-    frequency = ["不明/Inconnu"]
+    frequency = "不明/Inconnu"
 
     for row in soup.select("table.infoTable tr"):
         label = row.find("div", class_="label")
@@ -61,7 +61,7 @@ def get_data(kanji):
                     frequency = freq_match.group(1)
                 # exception avec 日 (frequency_value = "書き言葉に用いられる最も一般的な漢字です。")
                 if kanji == "日":
-                    frequency = 1
+                    frequency = "1"
 
 
     samplewords = []
