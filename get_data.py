@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+from PIL import Image
+from io import BytesIO
 
 def connection(kanji):
     errormessages = []
@@ -83,12 +85,31 @@ def get_data(kanji):
 
     return kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages
 
+def define_image(kanji):
+    """Returns image url and its width & height"""
+    # old f'https://kakijun.com/kanjiphoto/worksheet/2/kanji-kakijun-worksheet-2-{hex(ord(kanji))[2:6]}.png'
+    img_url = f'https://www.writechinese.com/assets/strokeorder/stroke/ja/{ord(kanji)}.png'
+    try:
+        response = requests.get(img_url)
+        response.raise_for_status()
+    except Exception as e:
+        img_url = f'https://kakijun.com/kanjiphoto/frame/kanji-kakijun-kakusu-{hex(ord(kanji))[2:6]}.png'
+        response = requests.get(img_url)
+        response.raise_for_status()
+        print(kanji, e)
+    image = Image.open(BytesIO(response.content))
+    width, height = image.size
+        
+    return img_url, width, height
+
 # test
 if __name__ == "__main__":
     print("Test")
-    samplekanji = "猿"
+    samplekanji = "鬱"
     kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages = get_data(samplekanji)
     print("Sample kanji = ", samplekanji) 
     print("onyomi = ", onyomi, " jlpt level = ", jlptlevel, " frequency = ", frequency)
     print("samplewords = ", samplewords)
     print("Error messages = ", errormessages)
+    img_url, width, height = define_image(samplekanji)
+    print(width, height)

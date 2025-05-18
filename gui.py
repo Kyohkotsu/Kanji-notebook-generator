@@ -33,10 +33,17 @@ class KanjiScrapingApp(tk.Frame):
         self.response_text = scrolledtext.ScrolledText(self, width=50)
         self.response_text.pack(pady=5, padx=5)
 
+    def clean_data(self, user_input):
+        """Elimine  les autres caractères et les kanjis redondants"""
+        kanji_list = re.findall(r'[\u4e00-\u9faf]', user_input)
+        seen = set()
+        seen_add = seen.add
+        return [x for x in kanji_list if not (x in seen or seen_add(x))]
+
     def get_request(self):
         """Convertit le texte saisi en une liste de kanjis. Pour chaque kanji, il émet une requête de recherche."""
-        kanji_list = self.kanjiInput_entry.get().strip()
-        kanji_list = re.findall(r'[\u4e00-\u9faf]', kanji_list)
+        kanji_list = self.clean_data(self.kanjiInput_entry.get().strip())
+
         if not kanji_list:
             self.response_text.insert(tk.END, "Veuillez saisir une liste de kanjis.\n")
             return
@@ -44,6 +51,7 @@ class KanjiScrapingApp(tk.Frame):
             self.response_text.insert(tk.END, f"Traitement de {kanji_list}:\n")
             kanji_list = list(kanji_list)
             pdf = Kanjiinpdf()
+            pdf.make_sample_page(kanji_list)
             i = 1
             for c in kanji_list:
                 kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages = get_data(c)
@@ -52,6 +60,7 @@ class KanjiScrapingApp(tk.Frame):
                 self.response_text.insert(tk.END, f"音読み (Onyomi) : {str(onyomi)} \n")
                 for message in errormessages:
                     self.response_text.insert(tk.END, f"Attention : {message}\n")
+                
                 pdf.create_kanji_pdf(c, kunyomi, onyomi, jlptlevel, frequency, samplewords)
                 self.response_text.insert(tk.END, f"{c} a été ajouté dans le pdf.\n\n")
                 i += 1
