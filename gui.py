@@ -51,7 +51,7 @@ class KanjiScrapingApp(tk.Frame):
             self.response_text.insert(tk.END, f"Traitement de {kanji_list}:\n")
             kanji_list = list(kanji_list)
             pdf = Kanjiinpdf()
-            pdf.make_sample_page(kanji_list)
+            pdf.make_title_page(kanji_list)
             i = 1
             for c in kanji_list:
                 kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages = get_data(c)

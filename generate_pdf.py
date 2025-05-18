@@ -15,6 +15,23 @@ class Kanjiinpdf(str):
         self.width, self.height = A4
         self.page = 0
 
+    def show_page_with_grid(self, kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords):
+        """Guide pour le design"""
+        self.c.setStrokeColor(colors.blue)
+        self.c.setFillColor(colors.blue)
+
+        self.c.setLineWidth(0.3)
+        self.c.setFont('Noto',5)
+        for a in range(1,40):
+            for b in range(1,40):
+                self.c.line(a*25,b*25, a*25, 0)
+                self.c.line(0,b*25, a*25, b*25)
+                if a%2==0:
+                    self.c.drawString(a*25,0,str(a*25))
+                    self.c.drawString(0,b*25,str(b*25))
+        self.create_kanji_pdf(kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords)
+
+
     def draw_rectangle(self,X1,Y1,X2,Y2):
         """Dessine un rectangle de coordonnées A(X1,Y1), B(X2,Y1), C(X2,Y2), D(X1,Y2)"""
         self.c.line(X1,Y1,X2,Y1)
@@ -63,9 +80,12 @@ class Kanjiinpdf(str):
             freq_label = "めずらしい"
         self.c.drawString(x + width + 4, y + 2, freq_label)
 
-
-    def make_sample_page(self,kanji_list):
-        """Pour la première page du fichier pdf. Cette fonction crée une page titre qui sert aussi de guide d'usage et d'index"""
+    def make_title_page(self,kanji_list):
+        """Crée une page titre : avec le titre, l'index, un guide d'utilisation et les crédits"""
+        self.c.setStrokeColor(colors.black)
+        self.c.setFillColor(colors.black)
+        self.c.setLineWidth(1)
+        self.c.setFillAlpha(1)
         self.c.setFont('Kyokasho', 100)
         self.c.drawString(50, 725, '漢字ノート') 
         self.c.setFont('Noto', 15)
@@ -134,8 +154,12 @@ class Kanjiinpdf(str):
         # saut de page
         self.c.showPage()
     
-
     def create_kanji_pdf(self, kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords):
+        """Dessine une page de kanji"""
+        self.c.setStrokeColor(colors.black)
+        self.c.setFillColor(colors.black)
+        self.c.setLineWidth(1)
+        self.c.setFillAlpha(1)
         self.c.setFont('Kyokasho', 100)
         self.c.drawString(50, 725, f'{kanji}')
         self.c.setFont('Noto', 16)
@@ -184,7 +208,6 @@ class Kanjiinpdf(str):
         for y in range(1,6):
             self.c.line(350, y*100-50, 550, y*100-50)
         
-        
         image_url, img_width, img_height = get_data.define_image(kanji)
         if img_height <= 3072:
             adjusted_width = 200
@@ -197,7 +220,6 @@ class Kanjiinpdf(str):
 
         self.page += 1
         self.c.drawString(550, 20, f'{self.page}')
-        
         self.c.showPage()
 
     def savedocument(self):
@@ -209,14 +231,14 @@ if __name__ == '__main__':
     import os
     print("Test. Création de kanji.pdf en cours...")
     pdf = Kanjiinpdf()
-    pdf.make_sample_page(['見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑','見','本','鑑'])
+    pdf.make_title_page(['山'])
     kanji = '山'
     kunyomi = ['やま']
     onyomi = ['サン','ザン']
     samplewords =  [('火山', 'かざん', 'volcano'), ('富士山', 'ふじさん','Mount Fuji')]
     jlptlevel = ["N5"]
     frequency = ["400"]
-    pdf.create_kanji_pdf(kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords)
+    pdf.show_page_with_grid(kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords)
     try:
         pdf.savedocument()
         print("Test terminé!")
