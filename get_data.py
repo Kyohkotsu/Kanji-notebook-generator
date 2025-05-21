@@ -1,30 +1,52 @@
+import re
 import requests
 from bs4 import BeautifulSoup
-import re
-from PIL import Image
 from io import BytesIO
+from PIL import Image
+from collections import defaultdict
+import time
 
 def connection(kanji):
-    errormessages = []
     url = f"https://www.nihongo-pro.com/jp/kanji-pal/kanji/{kanji}"
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-
+    response = requests.get(url, headers=headers, timeout=5)
     if response.status_code != 200:
-        errormessages.append("Erreur de connexion sur {url}. Vérifiez la connexion internet.")
-        return [], []
+        raise ConnectionError
+    return response
 
-    return response, errormessages
+def sort_data(kanji_list):
+    """Ordonne les kanjis selon la clé"""
+    sorted_kanji_list = defaultdict(list)
+    for kanji in kanji_list:
+        response = connection(kanji)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        radical = (soup.select_one("div.radical_name_jp")).text.strip()
+        sorted_kanji_list[radical].append(kanji)
+        
+        time.sleep(0.3)
+
+    sorted_kanji_list=dict(sorted_kanji_list)
+    return sorted_kanji_list
 
 def get_data(kanji):
     """Reçoit un kanji, recherche la page dans jisho.org et retourne les variables onyomi et kunyomi"""
-    response, errormessages = connection(kanji)
-
+    response = connection(kanji)
     soup = BeautifulSoup(response.text, "html.parser")
+
+    rows = soup.select("table.infoTable tr")
+
+    translation = None
+    for row in rows:
+        label = row.find("div", class_="label")
+        if label and "英訳" in label.text:
+            value = row.find("div", class_="value")
+            if value:
+                translation = value.text.strip()
+            break
 
     kunyomi = []
     onyomi = []
-
     for table in soup.select("div.readingsTableDiv > table"):
         label_div = table.find("div", class_="kanji_readingsLabel")
         if label_div:
@@ -65,7 +87,6 @@ def get_data(kanji):
                 if kanji == "日":
                     frequency = "1"
 
-
     samplewords = []
     for row in soup.find_all("tr", class_=["sampleWord_row0", "sampleWord_row1"]):
         ruby = row.find("div", class_="sampleWord_ruby")   
@@ -82,8 +103,8 @@ def get_data(kanji):
 
     if len(samplewords) >= 3:
         samplewords = samplewords[:3]
-
-    return kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages
+    time.sleep(0.3)
+    return translation, kunyomi, onyomi, jlptlevel, frequency, samplewords
 
 def define_image(kanji):
     """Returns image url and its width & height"""
@@ -92,11 +113,12 @@ def define_image(kanji):
     try:
         response = requests.get(img_url)
         response.raise_for_status()
-    except Exception as e:
+        time.sleep(0.3)
+    except requests.RequestException as e:
+        # print(kanji, e)
         img_url = f'https://kakijun.com/kanjiphoto/frame/kanji-kakijun-kakusu-{hex(ord(kanji))[2:6]}.png'
         response = requests.get(img_url)
-        response.raise_for_status()
-        print(kanji, e)
+
     image = Image.open(BytesIO(response.content))
     width, height = image.size
         
@@ -106,10 +128,9 @@ def define_image(kanji):
 if __name__ == "__main__":
     print("Test")
     samplekanji = "鬱"
-    kunyomi, onyomi, jlptlevel, frequency, samplewords, errormessages = get_data(samplekanji)
+    kunyomi, onyomi, jlptlevel, frequency, samplewords = get_data(samplekanji)
     print("Sample kanji = ", samplekanji) 
     print("onyomi = ", onyomi, " jlpt level = ", jlptlevel, " frequency = ", frequency)
     print("samplewords = ", samplewords)
-    print("Error messages = ", errormessages)
     img_url, width, height = define_image(samplekanji)
     print(width, height)

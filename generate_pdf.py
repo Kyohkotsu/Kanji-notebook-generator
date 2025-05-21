@@ -8,14 +8,14 @@ import get_data
 
 class Kanjiinpdf(str):
     """Configure et génère un pdf"""
-    def __init__(self):
+    def __init__(self, nomFichier):
         pdfmetrics.registerFont(TTFont('Noto', 'NotoSansJP-VF.ttf'))
         pdfmetrics.registerFont(TTFont('Kyokasho', 'HGRKK.TTC'))
-        self.c = canvas.Canvas('kanji.pdf', pagesize=A4)
+        self.c = canvas.Canvas(f'{nomFichier}.pdf', pagesize=A4)
         self.width, self.height = A4
         self.page = 0
 
-    def show_page_with_grid(self, kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords):
+    def show_page_with_grid(self, kanji, translation, kunyomi, onyomi, jlptlevel, frequency, samplewords):
         """Guide pour le design"""
         self.c.setStrokeColor(colors.blue)
         self.c.setFillColor(colors.blue)
@@ -27,10 +27,10 @@ class Kanjiinpdf(str):
                 self.c.line(a*25,b*25, a*25, 0)
                 self.c.line(0,b*25, a*25, b*25)
                 if a%2==0:
-                    self.c.drawString(a*25,0,str(a*25))
+                    self.c.drawString(a*25,835,str(a*25))
+                if b%2==0:
                     self.c.drawString(0,b*25,str(b*25))
-        self.create_kanji_pdf(kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords)
-
+        self.create_kanji_pdf(kanji, translation, kunyomi, onyomi, jlptlevel, frequency, samplewords)
 
     def draw_rectangle(self,X1,Y1,X2,Y2):
         """Dessine un rectangle de coordonnées A(X1,Y1), B(X2,Y1), C(X2,Y2), D(X1,Y2)"""
@@ -91,7 +91,7 @@ class Kanjiinpdf(str):
         self.c.setFont('Noto', 15)
 
         kanji_count = len(kanji_list)
-        if kanji_count <= 100:
+        if kanji_count <= 104:
             self.c.drawString(50, 690, "Ce cahier contient les kanjis suivant:")
             i = 1
             j = 1
@@ -154,7 +154,7 @@ class Kanjiinpdf(str):
         # saut de page
         self.c.showPage()
     
-    def create_kanji_pdf(self, kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords):
+    def create_kanji_pdf(self, kanji, translation, kunyomi, onyomi, jlptlevel, frequency, samplewords):
         """Dessine une page de kanji"""
         self.c.setStrokeColor(colors.black)
         self.c.setFillColor(colors.black)
@@ -163,6 +163,7 @@ class Kanjiinpdf(str):
         self.c.setFont('Kyokasho', 100)
         self.c.drawString(50, 725, f'{kanji}')
         self.c.setFont('Noto', 16)
+        self.c.drawString(150, 725, translation)
         self.c.drawString(50, 700, f'訓読み(くんよみ): {'/'.join(kunyomi)}')
         self.c.drawString(50, 680, f'音読み(おんよみ): {'/'.join(onyomi)}')
 
@@ -216,7 +217,7 @@ class Kanjiinpdf(str):
             adjusted_height = 480
             adjusted_width = img_width/img_height*480
         self.c.drawImage(image_url, 50, 470-adjusted_height, adjusted_width, adjusted_height)
-        self.c.drawString(50, 480, "書き順：")
+        self.c.drawString(50, 480, "書き順（かきじゅん）：")
 
         self.page += 1
         self.c.drawString(550, 20, f'{self.page}')
@@ -230,18 +231,19 @@ class Kanjiinpdf(str):
 if __name__ == '__main__':
     import os
     print("Test. Création de kanji.pdf en cours...")
-    pdf = Kanjiinpdf()
+    pdf = Kanjiinpdf("kanji_sample")
     pdf.make_title_page(['山'])
     kanji = '山'
+    translation = 'Mountain'
     kunyomi = ['やま']
     onyomi = ['サン','ザン']
     samplewords =  [('火山', 'かざん', 'volcano'), ('富士山', 'ふじさん','Mount Fuji')]
     jlptlevel = ["N5"]
     frequency = ["400"]
-    pdf.show_page_with_grid(kanji, kunyomi, onyomi, jlptlevel, frequency, samplewords)
+    pdf.show_page_with_grid(kanji, translation, kunyomi, onyomi, jlptlevel, frequency, samplewords)
     try:
         pdf.savedocument()
         print("Test terminé!")
-        os.startfile("kanji.pdf")
+        os.startfile("kanji_sample.pdf")
     except Exception as e:
         print(e)
