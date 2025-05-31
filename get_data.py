@@ -25,8 +25,8 @@ def sort_data(kanji_list):
         sorted_kanji_list[radical].append(kanji)
         
         time.sleep(0.3)
-
-    sorted_kanji_list=dict(sorted_kanji_list)
+    sorted_kanji_list=sorted(sorted_kanji_list.items())
+    print(sorted_kanji_list)
     return sorted_kanji_list
 
 def get_data(kanji):
@@ -109,14 +109,14 @@ def get_data(kanji):
 def define_image(kanji):
     """Returns image url and its width & height"""
     # old f'https://kakijun.com/kanjiphoto/worksheet/2/kanji-kakijun-worksheet-2-{hex(ord(kanji))[2:6]}.png'
-    img_url = f'https://www.writechinese.com/assets/strokeorder/stroke/ja/{ord(kanji)}.png'
+    img_url = f'https://kakijun.com/kanjiphoto/frame/kanji-kakijun-kakusu-{hex(ord(kanji))[2:6]}.png'
     try:
         response = requests.get(img_url)
         response.raise_for_status()
         time.sleep(0.3)
     except requests.RequestException as e:
         # print(kanji, e)
-        img_url = f'https://kakijun.com/kanjiphoto/frame/kanji-kakijun-kakusu-{hex(ord(kanji))[2:6]}.png'
+        img_url = f'https://www.writechinese.com/assets/strokeorder/stroke/ja/{ord(kanji)}.png'
         response = requests.get(img_url)
 
     image = Image.open(BytesIO(response.content))
@@ -128,7 +128,7 @@ def define_image(kanji):
 if __name__ == "__main__":
     print("Test")
     samplekanji = "鬱"
-    kunyomi, onyomi, jlptlevel, frequency, samplewords = get_data(samplekanji)
+    translation, kunyomi, onyomi, jlptlevel, frequency, samplewords = get_data(samplekanji)
     print("Sample kanji = ", samplekanji) 
     print("onyomi = ", onyomi, " jlpt level = ", jlptlevel, " frequency = ", frequency)
     print("samplewords = ", samplewords)

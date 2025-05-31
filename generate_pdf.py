@@ -5,12 +5,12 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 import get_data
 
-
 class Kanjiinpdf(str):
     """Configure et génère un pdf"""
     def __init__(self, nomFichier):
         pdfmetrics.registerFont(TTFont('Noto', 'NotoSansJP-VF.ttf'))
         pdfmetrics.registerFont(TTFont('Kyokasho', 'HGRKK.TTC'))
+        pdfmetrics.registerFont(TTFont('Tegaki', 'HGRGY.TTC'))
         self.c = canvas.Canvas(f'{nomFichier}.pdf', pagesize=A4)
         self.width, self.height = A4
         self.page = 0
@@ -86,7 +86,7 @@ class Kanjiinpdf(str):
         self.c.setFillColor(colors.black)
         self.c.setLineWidth(1)
         self.c.setFillAlpha(1)
-        self.c.setFont('Kyokasho', 100)
+        self.c.setFont('Tegaki', 100)
         self.c.drawString(50, 725, '漢字ノート') 
         self.c.setFont('Noto', 15)
 
@@ -145,11 +145,13 @@ class Kanjiinpdf(str):
         # crédits
         self.c.setFont('Noto', 10)
         self.c.setFillColor(colors.gray)
-        self.c.drawString(50, 120, "Réservé à un usage éducatif et personnel.")
-        self.c.drawString(50, 100, "Sources d'informations et d'images :")
-        self.c.drawString(60, 80, "-www.nihongo-pro.com")
-        self.c.drawString(60, 60, "-www.writechinese.com")
-        self.c.drawString(60, 40, "-kakijun.com")
+        self.c.drawString(50, 140, "Réservé à un usage éducatif et personnel.")
+        self.c.drawString(50, 120, "Sources d'informations et d'images :")
+        self.c.drawString(60, 100, "-www.nihongo-pro.com")
+        self.c.drawString(60, 80, "-www.writechinese.com")
+        self.c.drawString(60, 60, "-www.kakijun.com")
+        self.c.setFont('Noto', 8)
+        self.c.drawString(140, 40, " ー ティエリ・ドリオン") 
 
         # saut de page
         self.c.showPage()

@@ -31,7 +31,7 @@ class KanjiScrapingApp(tk.Frame):
 
         self.get_reply_button = tk.Button(self.button_frame, bg="skyblue", text="Générer", command=self.get_request, cursor="hand2")
         self.get_reply_button.pack(side=tk.LEFT, pady=5)
-        self.sort_button = tk.Button(self.button_frame, text="Classer", command=self.sort_kanji, cursor="hand2")
+        self.sort_button = tk.Button(self.button_frame, text="Classer par radical", command=self.sort_kanji, cursor="hand2")
         self.sort_button.pack(side=tk.LEFT, padx=5, pady=5)
         self.clear_button = tk.Button(self.button_frame, text="Effacer", command=self.clear_entry, cursor="hand2")
         self.clear_button.pack(side=tk.LEFT, pady=5)
@@ -53,7 +53,7 @@ class KanjiScrapingApp(tk.Frame):
             return
         sorted_kanji_list = sort_data(kanji_list)
         self.kanjiInput_entry.delete('1.0', tk.END)
-        for kanji in sorted_kanji_list.items():
+        for kanji in dict(sorted_kanji_list).items():
             self.kanjiInput_entry.insert(tk.END, kanji)
             self.kanjiInput_entry.insert(tk.END, "\n")
 
@@ -66,6 +66,12 @@ class KanjiScrapingApp(tk.Frame):
         self.kanjiInput_entry.delete('1.0', tk.END)
         self.kanjiInput_entry.insert(tk.END, f"Traitement de: \n{', '.join(kanji_list)}\n")
         nomFichier = self.fileName_entry.get().strip()
+
+        if len(kanji_list)>=5:
+            if messagebox.askokcancel("Cette opération nécessite du temps", f"Traiter {len(kanji_list)} kanjis peut prendre jusqu'à {len(kanji_list)*1.2} secondes.", )==True:
+                pass
+            else:
+                return
         
         # Vérifier si le fichier est déjà ouvert et si le nom est valide
         if not nomFichier:
@@ -77,7 +83,7 @@ class KanjiScrapingApp(tk.Frame):
             messagebox.showwarning('Fichier inaccessible', f"Le fichier {nomFichier}.pdf est déjà ouvert. Veuillez fermer ce fichier et refaire.")
             return
         except FileNotFoundError:
-            messagebox.showwarning('Fichier inaccessible', f"Vérifiez la validité du nom de fichier.")
+            messagebox.showwarning('Fichier inaccessible', f"Vérifiez si ce nom du fichier est valide dans votre OS.")
             return
 
         pdf = Kanjiinpdf(nomFichier)
