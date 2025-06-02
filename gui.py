@@ -12,6 +12,7 @@ class KanjiScrapingApp(tk.Frame):
     def __init__(self, master: tk):
         super().__init__(master)
         master.title("漢字スクレイピング")
+        master.iconbitmap("./manabu_transparent.ico")
         self.pack()
         self.create_widgets()
 
@@ -67,10 +68,8 @@ class KanjiScrapingApp(tk.Frame):
         self.kanjiInput_entry.insert(tk.END, f"Traitement de: \n{', '.join(kanji_list)}\n")
         nomFichier = self.fileName_entry.get().strip()
 
-        if len(kanji_list)>=5:
-            if messagebox.askokcancel("Cette opération nécessite du temps", f"Traiter {len(kanji_list)} kanjis peut prendre jusqu'à {len(kanji_list)*1.2} secondes.", )==True:
-                pass
-            else:
+        if len(kanji_list)>=10:
+            if action(self, kanji_list) == False:
                 return
         
         # Vérifier si le fichier est déjà ouvert et si le nom est valide
@@ -102,5 +101,47 @@ class KanjiScrapingApp(tk.Frame):
         
         pdf.savedocument()
         messagebox.showinfo('Terminé', f"Document sauvegardé dans {os.getcwd()}\n")
-
         os.startfile(f"{nomFichier}.pdf")
+
+def boite_confirmation(parent, message):
+    # Crée une fenêtre secondaire modale
+    confirmation = tk.Toplevel(parent)
+    confirmation.title("Cette action peut nécessiter du temps")
+    confirmation.iconbitmap("./Timer-alert.ico")
+    confirmation.transient(parent)
+    confirmation.grab_set()  # Rend la fenêtre modale
+
+    resultat = {"valeur": None}  # Dictionnaire pour stocker le choix
+
+    # Message
+    label = tk.Label(confirmation, text=message, padx=20, pady=10)
+    label.pack()
+
+    def proceder():
+        resultat["valeur"] = True
+        confirmation.destroy()
+
+    def annuler():
+        resultat["valeur"] = False
+        confirmation.destroy()
+        
+
+    # Boutons personnalisés
+    bouton_proc = tk.Button(confirmation, text="Procéder", command=proceder)
+    bouton_annul = tk.Button(confirmation, text="Annuler", command=annuler)
+
+    bouton_proc.pack(side="left", padx=20, pady=10)
+    bouton_annul.pack(side="right", padx=20, pady=10)
+    parent.wait_window(confirmation)
+
+    return resultat["valeur"]
+
+def action(self, kanji_list):
+    resultat = boite_confirmation(self, f"La recherche peut nécessiter jusqu'à {len(kanji_list)*1.2} secondes. \nVoulez-vous continuer?")
+    return resultat
+
+if __name__ == "__main__":
+    kanjiList = ["水", "火", "木", "金"]  # Exemple
+    root = tk.Tk()
+    tk.Button(root, text="Lancer une action", command=lambda:action(kanjiList)).pack(padx=20, pady=20)
+    root.mainloop()
