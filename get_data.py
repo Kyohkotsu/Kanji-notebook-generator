@@ -26,7 +26,7 @@ def sort_data(kanji_list):
         
         time.sleep(0.3)
     sorted_kanji_list=sorted(sorted_kanji_list.items())
-    print(sorted_kanji_list)
+    
     return sorted_kanji_list
 
 def get_data(kanji):
@@ -115,13 +115,13 @@ def define_image(kanji):
         response.raise_for_status()
         time.sleep(0.3)
     except requests.RequestException as e:
-        # print(kanji, e)
         img_url = f'https://www.writechinese.com/assets/strokeorder/stroke/ja/{ord(kanji)}.png'
         response = requests.get(img_url)
 
     image = Image.open(BytesIO(response.content))
+    
     width, height = image.size
-        
+    
     return img_url, width, height
 
 # test

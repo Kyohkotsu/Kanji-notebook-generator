@@ -212,12 +212,12 @@ class Kanjiinpdf(str):
             self.c.line(350, y*100-50, 550, y*100-50)
         
         image_url, img_width, img_height = get_data.define_image(kanji)
-        if img_height <= 3072:
-            adjusted_width = 200
-            adjusted_height = img_height/img_width*200
+        if img_height <= 2400:
+            adjusted_width = 220
+            adjusted_height = img_height/img_width*220
         else:
-            adjusted_height = 480
-            adjusted_width = img_width/img_height*480
+            adjusted_height = 470
+            adjusted_width = img_width/img_height*470
         self.c.drawImage(image_url, 50, 470-adjusted_height, adjusted_width, adjusted_height)
         self.c.drawString(50, 480, "書き順（かきじゅん）：")
 
