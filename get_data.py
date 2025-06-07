@@ -36,7 +36,7 @@ def get_data(kanji):
 
     rows = soup.select("table.infoTable tr")
 
-    translation = None
+    translation = ""
     for row in rows:
         label = row.find("div", class_="label")
         if label and "英訳" in label.text:
@@ -44,6 +44,11 @@ def get_data(kanji):
             if value:
                 translation = value.text.strip()
             break
+
+    if len(translation) >= 60 and len(translation.split(",")) >= 3:
+        translation = ",".join(translation.split(",")[:3])
+        if len(translation) >= 60:
+            translation = ",".join(translation.split(",")[:2])
 
     kunyomi = []
     onyomi = []
@@ -94,6 +99,10 @@ def get_data(kanji):
         
         if ruby and meaning:
             meaning = meaning.text.strip()
+            if len(meaning.split(",")) >= 3:
+                meaning = ",".join(meaning.split(",")[:3])
+                if len(meaning) >= 45:
+                    meaning = ",".join(meaning.split(",")[:2])
             reading_sect = ruby.find("rt")
             okurigana = reading_sect.find_parent("ruby").next_sibling
             okurigana = okurigana.strip() if okurigana else ""
