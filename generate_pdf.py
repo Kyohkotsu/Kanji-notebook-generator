@@ -80,7 +80,7 @@ class Kanjiinpdf(str):
             freq_label = "めずらしい"
         self.c.drawString(x + width + 4, y + 2, freq_label)
 
-    def make_title_page(self,kanji_list):
+    def make_title_page(self, kanji_list, kanjiDescription = None):
         """Crée une page titre : avec le titre, l'index, un guide d'utilisation et les crédits"""
         self.c.setStrokeColor(colors.black)
         self.c.setFillColor(colors.black)
@@ -91,7 +91,7 @@ class Kanjiinpdf(str):
         self.c.setFont('Noto', 15)
 
         kanji_count = len(kanji_list)
-        if kanji_count <= 104:
+        if kanji_count <= 104 and not kanjiDescription:
             self.c.drawString(50, 690, "Ce cahier contient les kanjis suivant:")
             i = 1
             j = 1
@@ -103,8 +103,24 @@ class Kanjiinpdf(str):
                         j+=1
                         i=1
                     n+=1
-        else:
+        elif not kanjiDescription:
             self.c.drawString(50, 690, f"Ce cahier contient {len(kanji_list)} kanjis [{''.join(kanji_list[0])} à {''.join(kanji_list[kanji_count-1])}]")
+        else:
+            mots = kanjiDescription.split()
+            lignes = []
+            ligne = ""
+            for mot in mots:
+                if len(ligne) + len(mot) + 1 <= 70:
+                    ligne += (" " if ligne else "") + mot
+                else:
+                    lignes.append(ligne)
+                    ligne = mot
+            if ligne:
+                lignes.append(ligne)
+            n = 0
+            for ligne in lignes:
+                self.c.drawString(50, 690-n, ligne)
+                n += 20
 
         imageX = 270
         imageY = 50

@@ -13,19 +13,31 @@ class KanjiScrapingApp(tk.Frame):
         super().__init__(master)
         master.title("漢字スクレイピング")
         master.iconbitmap("./manabu_transparent.ico")
+        master.geometry("420x360")
         self.pack()
         self.create_widgets()
 
     def create_widgets(self):
         self.fileName_label = tk.Label(self, text="Nom du fichier: ")
         self.fileName_label.pack(pady=(5, 0), padx=5, anchor=tk.W)
-        self.fileName_entry = tk.Entry(self, width=50)
-        self.fileName_entry.pack(pady=5, padx=5)
+        self.ligne2 = tk.Frame(self)
+        self.ligne2.pack(anchor=tk.W)
+        self.fileName_entry = tk.Entry(self.ligne2, width=40)
+        self.fileName_entry.pack(pady=5, padx=5, side=tk.LEFT)
+        ToolTip(self.fileName_entry, 'Champ optionnel')
+        self.dotpdf_label = tk.Label(self.ligne2, text=".pdf")
+        self.dotpdf_label.pack(pady=(5, 0), anchor=tk.W, side=tk.RIGHT)
+
+        self.kanjiDescription_label = tk.Label(self, text="Description: ")
+        self.kanjiDescription_label.pack(pady=(5, 0), padx=5, anchor=tk.W)
+        self.kanjiDescription_entry = tk.Entry(self, width=50)
+        self.kanjiDescription_entry.pack(pady=5, padx=5, anchor=tk.W)
+        ToolTip(self.kanjiDescription_entry, 'Champ optionnel. Entrez une description pour la liste de kanji qui figurera sur la page titre du fichier pdf.\ni.e. "Kanjis de niveau JLPT N5"')
 
         self.kanjiInput_label = tk.Label(self, text="Saisir les kanjis: ")
         self.kanjiInput_label.pack(pady=(5, 0), padx=5, anchor=tk.W)
-        self.kanjiInput_entry = scrolledtext.ScrolledText(self, width=50, height=10)
-        self.kanjiInput_entry.pack(pady=5, padx=5)
+        self.kanjiInput_entry = scrolledtext.ScrolledText(self, width=50, height=11)
+        self.kanjiInput_entry.pack(pady=5, padx=5, anchor=tk.W)
         
         self.button_frame = tk.Frame(self)
         self.button_frame.pack()
@@ -86,7 +98,7 @@ class KanjiScrapingApp(tk.Frame):
             return
 
         pdf = Kanjiinpdf(nomFichier)
-        pdf.make_title_page(kanji_list)
+        pdf.make_title_page(kanji_list,self.kanjiDescription_entry.get().strip())
         i = 1
         for kanji in kanji_list:
             try:
@@ -102,6 +114,32 @@ class KanjiScrapingApp(tk.Frame):
         pdf.savedocument()
         messagebox.showinfo('Terminé', f"Document sauvegardé dans {os.getcwd()}\n")
         os.startfile(f"{nomFichier}.pdf")
+
+class ToolTip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        widget.bind("<Enter>", self.show_tooltip)
+        widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None):
+        if self.tooltip_window or not self.text:
+            return
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
+        self.tooltip_window = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)  # Pas de bordure/fenêtre
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(tw, text=self.text, background="lightyellow",
+                         relief="solid", borderwidth=1,
+                         font=("Arial", 10))
+        label.pack(ipadx=5, ipady=2)
+
+    def hide_tooltip(self, event=None):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
 
 def boite_confirmation(parent, message):
     # Crée une fenêtre secondaire modale
